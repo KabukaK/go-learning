@@ -4,22 +4,27 @@ import (
 	"fmt"
 )
 
+type Expense struct {
+	Amount   float64
+	Category string
+	Date     string
+	Paycard  bool
+}
+
 func main() {
 
-	// var amount float64 = 500
-	// var category string = "Еда"
-	// var datespend string = "2026-09-17"
-	// var paycard bool = true
 	var limit float64 = 1000
-	e := Expense{Amount: 500, Category: "Еда", Date: "2026-09-17", Paycard: true}
-	defer fmt.Println("Прогграмма окончена")
-	// fmt.Println(classify(amount, limit))
-	for i := 1; i <= 7; i++ {
-		fmt.Println(i)
+	expenses := []Expense{
+		{Amount: 500, Category: "Еда", Date: "2026-09-17", Paycard: true},
+		{Amount: 1500, Category: "Машина", Date: "2026-09-15", Paycard: false},
 	}
-	// fmt.Println(amount, category, datespend, paycard)
-	fmt.Println(total(500, 100, 1000))
-	fmt.Println(e.Classify(limit))
+	defer fmt.Println("Прогграмма окончена")
+
+	expenses = append(expenses, Expense{Amount: 1000, Category: "Прочее", Date: "2026-09-13", Paycard: false})
+	for _, exp := range expenses {
+		fmt.Println(exp.Classify(limit))
+	}
+	fmt.Println(total(expenses))
 }
 
 func (e Expense) Classify(limit float64) (string, bool) {
@@ -32,17 +37,10 @@ func (e Expense) Classify(limit float64) (string, bool) {
 
 }
 
-func total(amounts ...float64) float64 {
+func total(expenses []Expense) float64 {
 	var sum float64
-	for _, amount := range amounts {
-		sum += amount
+	for _, exp := range expenses {
+		sum += exp.Amount
 	}
 	return sum
-}
-
-type Expense struct {
-	Amount   float64
-	Category string
-	Date     string
-	Paycard  bool
 }
