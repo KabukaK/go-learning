@@ -14,7 +14,7 @@ type Expense struct {
 
 func main() {
 
-	var limit float64 = 1000
+	// var limit float64 = 1000
 	expenses := []Expense{
 		{Amount: 500, Category: "Еда", Date: "2026-09-17", Paycard: true},
 		{Amount: 1500, Category: "Машина", Date: "2026-09-15", Paycard: false},
@@ -23,17 +23,23 @@ func main() {
 	defer fmt.Println("Прогграмма окончена")
 
 	expenses = append(expenses, Expense{Amount: 1000, Category: "Прочее", Date: "2026-09-13", Paycard: false})
-	for _, exp := range expenses {
-		fmt.Println(exp.Classify(limit))
-	}
+	// for _, exp := range expenses {
+	// 	fmt.Println(exp.Classify(limit))
+	// }
 	// fmt.Println(total(expenses))
 	// fmt.Println(totalsByCategory(expenses))
-	exp, err := NewExpense(100, "Машина")
-	if err != nil {
-		fmt.Println("Ошибка:", err)
-	} else {
-		fmt.Println("Новая трата:", exp)
-	}
+	// exp, err := NewExpense(100, "Машина")
+	// if err != nil {
+	// 	fmt.Println("Ошибка:", err)
+	// } else {
+	// 	fmt.Println("Новая трата:", exp)
+	// }
+
+	fmt.Println(filterByCategory(expenses, "Машина"))
+	fmt.Println(largestExpense(expenses))
+	fmt.Println(countByCategory(expenses))
+	addExpnense(expenses, 1000, "Еда")
+	addExpnense(expenses, -1000, "Еда")
 
 }
 
@@ -67,4 +73,48 @@ func NewExpense(amount float64, category string) (Expense, error) {
 		return Expense{}, errors.New("сумма траты должна быть положительной")
 	}
 	return Expense{Amount: amount, Category: category}, nil
+}
+
+func (e Expense) String() string {
+	return fmt.Sprintf("%s: %.2f (%s)", e.Category, e.Amount, e.Date)
+}
+
+func filterByCategory(expenses []Expense, category string) []Expense {
+	expense := []Expense{}
+	for _, exp := range expenses {
+		if exp.Category == category {
+			expense = append(expense, Expense{Amount: exp.Amount, Category: exp.Category, Date: exp.Date, Paycard: exp.Paycard})
+		}
+	}
+	return expense
+}
+
+func largestExpense(expenses []Expense) Expense {
+	var maxAmount float64
+	var ex Expense
+	for _, exp := range expenses {
+		if exp.Amount > maxAmount {
+			maxAmount = exp.Amount
+			ex = Expense{Amount: exp.Amount, Category: exp.Category, Date: exp.Date, Paycard: exp.Paycard}
+		}
+
+	}
+	return ex
+}
+
+func countByCategory(expenses []Expense) map[string]int {
+	counts := make(map[string]int)
+	for _, exp := range expenses {
+		counts[exp.Category] += 1
+	}
+	return counts
+}
+
+func addExpnense(expense []Expense, amount float64, category string) {
+	exp, err := NewExpense(amount, category)
+	if err != nil {
+		fmt.Println("Ошибка:", err)
+	} else {
+		fmt.Println("Новая трата:", exp)
+	}
 }
