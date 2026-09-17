@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -17,6 +18,7 @@ func main() {
 	expenses := []Expense{
 		{Amount: 500, Category: "Еда", Date: "2026-09-17", Paycard: true},
 		{Amount: 1500, Category: "Машина", Date: "2026-09-15", Paycard: false},
+		{Amount: 2000, Category: "Машина", Date: "2026-09-12", Paycard: false},
 	}
 	defer fmt.Println("Прогграмма окончена")
 
@@ -24,7 +26,15 @@ func main() {
 	for _, exp := range expenses {
 		fmt.Println(exp.Classify(limit))
 	}
-	fmt.Println(total(expenses))
+	// fmt.Println(total(expenses))
+	// fmt.Println(totalsByCategory(expenses))
+	exp, err := NewExpense(100, "Машина")
+	if err != nil {
+		fmt.Println("Ошибка:", err)
+	} else {
+		fmt.Println("Новая трата:", exp)
+	}
+
 }
 
 func (e Expense) Classify(limit float64) (string, bool) {
@@ -43,4 +53,18 @@ func total(expenses []Expense) float64 {
 		sum += exp.Amount
 	}
 	return sum
+}
+func totalsByCategory(expenses []Expense) map[string]float64 {
+	totals := make(map[string]float64)
+	for _, exp := range expenses {
+		totals[exp.Category] += exp.Amount
+	}
+	return totals
+}
+
+func NewExpense(amount float64, category string) (Expense, error) {
+	if amount <= 0 || category == "" {
+		return Expense{}, errors.New("сумма траты должна быть положительной")
+	}
+	return Expense{Amount: amount, Category: category}, nil
 }
