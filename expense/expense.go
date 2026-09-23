@@ -1,0 +1,98 @@
+package expense
+
+import (
+	"errors"
+	"fmt"
+)
+
+type Expense struct {
+	Amount   float64
+	Category string
+	Date     string
+	Paycard  bool
+}
+
+func (e Expense) Classify(limit float64) (string, bool) {
+
+	if e.Amount > limit {
+		return "Крупная трата", true
+	} else {
+		return "Мелкая трата", false
+	}
+
+}
+
+func Total(expenses []Expense) float64 {
+	var sum float64
+	for _, exp := range expenses {
+		sum += exp.Amount
+	}
+	return sum
+}
+func TotalsByCategory(expenses []Expense) map[string]float64 {
+	totals := make(map[string]float64)
+	for _, exp := range expenses {
+		totals[exp.Category] += exp.Amount
+	}
+	return totals
+}
+
+func NewExpense(amount float64, category string) (Expense, error) {
+	if amount <= 0 || category == "" {
+		return Expense{}, errors.New("сумма траты должна быть положительной")
+	}
+	return Expense{Amount: amount, Category: category}, nil
+}
+
+func (e Expense) String() string {
+	return fmt.Sprintf("%s: %.2f (%s)", e.Category, e.Amount, e.Date)
+}
+
+func FilterByCategory(expenses []Expense, category string) []Expense {
+	expense := []Expense{}
+	for _, exp := range expenses {
+		if exp.Category == category {
+			expense = append(expense, Expense{Amount: exp.Amount, Category: exp.Category, Date: exp.Date, Paycard: exp.Paycard})
+		}
+	}
+	return expense
+}
+
+func LargestExpense(expenses []Expense) Expense {
+	var maxAmount float64
+	var ex Expense
+	for _, exp := range expenses {
+		if exp.Amount > maxAmount {
+			maxAmount = exp.Amount
+			ex = Expense{Amount: exp.Amount, Category: exp.Category, Date: exp.Date, Paycard: exp.Paycard}
+		}
+
+	}
+	return ex
+}
+
+func CountByCategory(expenses []Expense) map[string]int {
+	counts := make(map[string]int)
+	for _, exp := range expenses {
+		counts[exp.Category] += 1
+	}
+	return counts
+}
+
+func AddExpnense(expense []Expense, amount float64, category string) ([]Expense, error) {
+	exp, err := NewExpense(amount, category)
+	if err != nil {
+		return expense, err
+	} else {
+		expense = append(expense, exp)
+		return expense, nil
+	}
+}
+
+func ClassifyAsync(exp Expense, limit float64, ch chan string) {
+	message, _ := exp.Classify(1000)
+	category := exp.Category
+	amount := exp.Amount
+	s := fmt.Sprintf("%s: %.2f - %s", category, amount, message)
+	ch <- s
+}
