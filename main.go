@@ -14,7 +14,7 @@ type Expense struct {
 
 func main() {
 
-	// var limit float64 = 1000
+	var limit float64 = 1000
 	expenses := []Expense{
 		{Amount: 500, Category: "Еда", Date: "2026-09-17", Paycard: true},
 		{Amount: 1500, Category: "Машина", Date: "2026-09-15", Paycard: false},
@@ -35,11 +35,21 @@ func main() {
 	// 	fmt.Println("Новая трата:", exp)
 	// }
 
-	fmt.Println(filterByCategory(expenses, "Машина"))
-	fmt.Println(largestExpense(expenses))
-	fmt.Println(countByCategory(expenses))
-	addExpnense(expenses, 1000, "Еда")
-	addExpnense(expenses, -1000, "Еда")
+	// fmt.Println(filterByCategory(expenses, "Машина"))
+	// fmt.Println(largestExpense(expenses))
+	// fmt.Println(countByCategory(expenses))
+	// expenses, err := addExpnense(expenses, 1000, "Еда")
+	// if err != nil {
+	// 	fmt.Println("Ошибка:", err)
+	// }
+
+	ch := make(chan string)
+	for _, exp := range expenses {
+		go classifyAsync(exp, limit, ch)
+	}
+	for i := 0; i < len(expenses); i++ {
+		fmt.Println(<-ch)
+	}
 
 }
 
@@ -110,11 +120,20 @@ func countByCategory(expenses []Expense) map[string]int {
 	return counts
 }
 
-func addExpnense(expense []Expense, amount float64, category string) {
+func addExpnense(expense []Expense, amount float64, category string) ([]Expense, error) {
 	exp, err := NewExpense(amount, category)
 	if err != nil {
-		fmt.Println("Ошибка:", err)
+		return expense, err
 	} else {
-		fmt.Println("Новая трата:", exp)
+		expense = append(expense, exp)
+		return expense, nil
 	}
+}
+
+func classifyAsync(exp Expense, limit float64, ch chan string) {
+	message, _ := exp.Classify(1000)
+	category := exp.Category
+	amount := exp.Amount
+	s := fmt.Sprintf("%s: %.2f - %s", category, amount, message)
+	ch <- s
 }
